@@ -73,19 +73,16 @@ public class WebAuthn4jAuthenticator implements Authenticator {
             // in 2 Factor Scenario
             List<String> publicKeyCredentialIds = user.getAttribute(WebAuthnConstants.PUBKEY_CRED_ID_ATTR);
             if (publicKeyCredentialIds == null || publicKeyCredentialIds.isEmpty()) {
-                throw new AuthenticationFlowException("public key credential id is not registerd.", AuthenticationFlowError.CREDENTIAL_SETUP_REQUIRED);
-            } else if (publicKeyCredentialIds.size() > 1) {
-                throw new AuthenticationFlowException("multiple public key credential ids are registerd.", AuthenticationFlowError.CREDENTIAL_SETUP_REQUIRED);
+                user.addRequiredAction("webauthn-register");
+                context.success();
+            } else {
+                publicKeyCredentialId = publicKeyCredentialIds.get(0);
+                logger.infov("publicKeyCredentialId = {0}", publicKeyCredentialId);
+                params.put(WebAuthnConstants.PUBLIC_KEY_CREDENTIAL_ID, publicKeyCredentialId);
+                params.forEach(form::setAttribute);
+                context.challenge(form.createForm("webauthn.ftl"));
             }
-            publicKeyCredentialId = publicKeyCredentialIds.get(0);
-            logger.debugv("publicKeyCredentialId = {0}", publicKeyCredentialId);
-        } else {
-            // in Passwordless Scenario
-            // NOP
         }
-        params.put(WebAuthnConstants.PUBLIC_KEY_CREDENTIAL_ID, publicKeyCredentialId);
-        params.forEach(form::setAttribute);
-        context.challenge(form.createForm("webauthn.ftl"));
     }
 
     public void action(AuthenticationFlowContext context) {

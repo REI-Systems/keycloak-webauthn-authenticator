@@ -87,48 +87,10 @@ public class WebAuthn4jAuthenticatorTest {
         // test
         try {
             authenticator.authenticate(context);
-            Assert.fail();
+            verify(context, times(1)).success();
         } catch (AuthenticationFlowException e) {
             // NOP
         }
-        when(context.getUser().getAttribute(WebAuthnConstants.PUBKEY_CRED_ID_ATTR)).thenReturn(new ArrayList<String>());
-        try {
-            authenticator.authenticate(context);
-            Assert.fail();
-        } catch (AuthenticationFlowException e) {
-            // NOP
-        }
-    }
-
-    @Test
-    public void test_authenticate_2factor_multiple_publicKey_registered() throws Exception {
-        // set up mock
-        List<String> publicKeyCredentialIds = new ArrayList<>();
-        publicKeyCredentialIds.add(getRandomString(32));
-        publicKeyCredentialIds.add(getRandomString(32));
-        when(context.getUser().getAttribute(WebAuthnConstants.PUBKEY_CRED_ID_ATTR)).thenReturn(publicKeyCredentialIds);
-
-        // test
-        try {
-            authenticator.authenticate(context);
-            Assert.fail();
-        } catch (AuthenticationFlowException e) {
-            // NOP
-        }
-    }
-
-    @Test
-    public void test_authenticate_passwordless() throws Exception {
-        // set up mock
-        when(context.getUser()).thenReturn(null);
-
-        // test
-        try {
-            authenticator.authenticate(context);
-        } catch (Exception e) {
-            Assert.fail(e.getMessage());
-        }
-        verify(context).challenge(any(Response.class));
     }
 
     @Test
@@ -154,7 +116,7 @@ public class WebAuthn4jAuthenticatorTest {
         verify(context).success();
     }
 
-    
+
     @Test
     public void test_action_credential_not_valid() throws Exception {
         // set up mock
@@ -305,7 +267,7 @@ public class WebAuthn4jAuthenticatorTest {
     private MultivaluedMap<String, String> getSimulatedParametersFromAuthenticationResponse(String userHandle) {
         return getSimulatedParametersFromAuthenticationResponse(null, null, null, null, userHandle);
     }
- 
+
     private MultivaluedMap<String, String> getSimulatedParametersFromAuthenticationResponse() {
         return getSimulatedParametersFromAuthenticationResponse(null, null, null, null, null);
     }
